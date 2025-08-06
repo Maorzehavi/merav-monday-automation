@@ -4,7 +4,6 @@ from pyngrok import ngrok
 import json
 
 API_TOKEN = ''
-BOARD_ID = 9753904634
 COLUMN_ID = "multiple_person_mkta46k5"
 
 HEADER = {
