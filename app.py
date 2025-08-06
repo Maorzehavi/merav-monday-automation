@@ -5,6 +5,7 @@ import json
 
 API_TOKEN = ''
 BOARD_ID = 9753904634
+COLUMN_ID = "multiple_person_mkta46k5"
 
 HEADER = {
     "Authorization": f"Bearer {API_TOKEN}",
@@ -60,7 +61,7 @@ def webhook():
         variables = {
             "boardId": board_id,
             "itemId": item_id,
-            "columnId": "multiple_person_mkta46k5",
+            "columnId": COLUMN_ID,
             "value": json.dumps({
                 "personsAndTeams": [
                     {"id": user_id, "kind": "person"}
