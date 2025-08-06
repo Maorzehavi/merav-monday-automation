@@ -3,9 +3,9 @@ import requests
 from pyngrok import ngrok
 import json
 
-API_TOKEN = ''  # Add your actual Monday API token here
-COLUMN_ID = "multiple_person_mkta46k5"           # The column to assign/unassign
-CHECK_COLUMN_ID = "color_mkt86f8b"               # The column being updated ("תיאור השיחה האחרונה")
+API_TOKEN = ''  
+COLUMN_ID = "multiple_person_mkta46k5"          
+CHECK_COLUMN_ID = "color_mkt86f8b"               
 
 HEADER = {
     "Authorization": f"Bearer {API_TOKEN}",
@@ -16,7 +16,7 @@ MONDAY_API_URL = "https://api.monday.com/v2"
 
 app = Flask(__name__)
 
-# Expose port 5000 to the public internet
+
 public_url = ngrok.connect(5000)
 print(f" * ngrok public URL: {public_url}")
 
@@ -48,7 +48,6 @@ def webhook():
     text = label.get("text", "")
 
     if column_id == CHECK_COLUMN_ID and user_id and item_id and board_id:
-        # Build value based on presence of text
         if text.strip() == "":
             column_value = { "personsAndTeams": [] }
             print("🔄 Unassigning user (empty value)")
