@@ -3,8 +3,9 @@ import requests
 from pyngrok import ngrok
 import json
 
-API_TOKEN = ''
-COLUMN_ID = "multiple_person_mkta46k5"
+API_TOKEN = ''  # Add your actual Monday API token here
+COLUMN_ID = "multiple_person_mkta46k5"           # The column to assign/unassign
+CHECK_COLUMN_ID = "color_mkt86f8b"               # The column being updated ("תיאור השיחה האחרונה")
 
 HEADER = {
     "Authorization": f"Bearer {API_TOKEN}",
@@ -34,16 +35,31 @@ def webhook():
     data = request.json
     print(data)
 
-    # Handle challenge response
     if 'challenge' in data:
         return jsonify({'challenge': data['challenge']})
 
     event = data.get("event", {})
     user_id = event.get("userId")
-    item_id = event.get("pulseId")  # Same as item ID
+    item_id = event.get("pulseId")
     board_id = event.get("boardId")
+    column_id = event.get("columnId")
+    value = event.get("value", {})
+    label = value.get("label", {})
+    text = label.get("text", "")
 
-    if user_id and item_id and board_id:
+    if column_id == CHECK_COLUMN_ID and user_id and item_id and board_id:
+        # Build value based on presence of text
+        if text.strip() == "":
+            column_value = { "personsAndTeams": [] }
+            print("🔄 Unassigning user (empty value)")
+        else:
+            column_value = {
+                "personsAndTeams": [
+                    { "id": user_id, "kind": "person" }
+                ]
+            }
+            print(f"👤 Assigning user {user_id}")
+
         mutation = """
         mutation ($boardId: ID!, $itemId: ID!, $columnId: String!, $value: JSON!) {
           change_column_value(
@@ -58,21 +74,19 @@ def webhook():
         """
 
         variables = {
-            "boardId": board_id,
-            "itemId": item_id,
+            "boardId": str(board_id),
+            "itemId": str(item_id),
             "columnId": COLUMN_ID,
-            "value": json.dumps({
-                "personsAndTeams": [
-                    {"id": user_id, "kind": "person"}
-                ]
-            })
+            "value": json.dumps(column_value)
         }
 
         try:
             result = run_query(mutation, variables)
-            print("✅ Assigned user:", result)
+            print("✅ Column updated:", result)
         except Exception as e:
-            print("❌ Error assigning user:", e)
+            print("❌ Error updating column:", e)
+    else:
+        print("Skipped: Not target column or missing data")
 
     return jsonify({"status": "received"})
 
